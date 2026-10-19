@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Idea to Impact — Biotech Readiness Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #060b14;
+      --s1:       #0b1220;
+      --s2:       #0f1928;
+      --s3:       #141f30;
+      --border:   rgba(255,255,255,.07);
+      --accent:   #00d4ff;
+      --violet:   #7c3aed;
+      --green:    #10b981;
+      --amber:    #f59e0b;
+      --rose:     #f43f5e;
+      --lavender: #a78bfa;
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --r:        16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── canvas background ── */
+    #bio-canvas {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; opacity: .7;
+    }
+
+    /* ── layout ── */
+    #app {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    .screen { display: none; width: 100%; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+    /* ════════════════════════════════ LANDING */
+    #s-landing {
+      min-height: 100vh;
+      justify-content: center;
+      padding: 60px 24px 80px;
+      text-align: center;
+    }
+
+    .landing-inner { max-width: 620px; }
+
+    .dna-wrap {
+      width: 88px; height: 88px; margin: 0 auto 28px;
+      background: linear-gradient(135deg, rgba(0,212,255,.12), rgba(124,58,237,.14));
+      border: 1px solid rgba(0,212,255,.22);
+      border-radius: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 44px;
+      animation: bob 4s ease-in-out infinite;
+      box-shadow: 0 0 40px rgba(0,212,255,.12);
+    }
+    @keyframes bob {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50%      { transform: translateY(-10px) rotate(4deg); }
+    }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(0,212,255,.07); border: 1px solid rgba(0,212,255,.18);
+      color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .13em;
+      text-transform: uppercase; padding: 5px 16px; border-radius: 99px; margin-bottom: 22px;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+      font-weight: 900; line-height: 1.1; margin-bottom: 18px;
+      background: linear-gradient(145deg, #fff 0%, var(--accent) 55%, var(--lavender) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.05rem; color: var(--muted); line-height: 1.8;
+      max-width: 480px; margin: 0 auto 36px;
+    }
+
+    .stats {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px;
+    }
+    .stat-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.04); backdrop-filter: blur(8px);
+      border: 1px solid var(--border); border-radius: 99px; padding: 8px 18px;
+    }
+    .stat-pill-num { font-size: 1.05rem; font-weight: 800; color: var(--accent); }
+    .stat-pill-label { font-size: 0.74rem; color: var(--muted); }
+
+    /* dimension cards on landing */
+    .dim-cards {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+      margin-bottom: 44px; max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+    .dim-card {
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; text-align: left;
+    }
+    .dim-card-top {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+    }
+    .dim-card-icon { font-size: 1.1rem; }
+    .dim-card-name { font-size: 0.82rem; font-weight: 800; color: var(--text); }
+    .dim-card-sub  { font-size: 0.74rem; color: var(--muted); line-height: 1.5; }
+
+    .btn-start {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--accent), #0096bb);
+      color: #000; font-size: 1.05rem; font-weight: 800;
+      padding: 17px 48px; border-radius: 99px; border: none; cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 0 48px rgba(0,212,255,.3);
+    }
+    .btn-start:hover { transform: translateY(-3px); box-shadow: 0 10px 52px rgba(0,212,255,.45); }
+    .btn-start:active { transform: none; }
+
+    .landing-note { margin-top: 14px; font-size: 0.77rem; color: var(--muted); }
+
+    /* ════════════════════════════════ QUIZ */
+    #s-quiz { padding: 0 24px 80px; }
+    .quiz-wrap { width: 100%; max-width: 640px; }
+
+    .quiz-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 26px 0 18px;
+    }
+    .q-counter { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+    .q-counter span { color: var(--accent); font-weight: 800; }
+    .pct-badge {
+      font-size: 0.77rem; font-weight: 700;
+      background: rgba(0,212,255,.09); border: 1px solid rgba(0,212,255,.16);
+      color: var(--accent); border-radius: 99px; padding: 3px 11px;
+    }
+
+    .progress-track {
+      height: 3px; background: var(--s3); border-radius: 99px;
+      overflow: hidden; margin-bottom: 26px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--violet));
+      border-radius: 99px;
+      transition: width .5s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* dimension section header */
+    .dim-section-header {
+      display: none;
+      align-items: center; gap: 12px;
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 16px; margin-bottom: 14px;
+    }
+    .dim-section-header.visible { display: flex; }
+    .dsh-icon { font-size: 1.3rem; }
+    .dsh-info { display: flex; flex-direction: column; gap: 1px; }
+    .dsh-name { font-size: 0.82rem; font-weight: 800; color: var(--text); }
+    .dsh-desc { font-size: 0.72rem; color: var(--muted); }
+
+    /* question card */
+    .q-card {
+      background: rgba(13,20,36,.85); backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 30px 26px;
+      margin-bottom: 20px;
+      animation: qIn .32s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes qIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .dim-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.69rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      border-radius: 99px; padding: 4px 12px; margin-bottom: 18px;
+    }
+    .dc-need       { background: rgba(16,185,129,.1);  color: #10b981; border: 1px solid rgba(16,185,129,.22); }
+    .dc-evidence   { background: rgba(0,212,255,.1);   color: var(--accent); border: 1px solid rgba(0,212,255,.22); }
+    .dc-groundwork { background: rgba(245,158,11,.1);  color: #f59e0b; border: 1px solid rgba(245,158,11,.22); }
+    .dc-drive      { background: rgba(167,139,250,.1); color: #a78bfa; border: 1px solid rgba(167,139,250,.22); }
+    .dc-context    { background: rgba(100,116,139,.09); color: var(--muted); border: 1px solid rgba(100,116,139,.15); }
+
+    .q-text {
+      font-size: 1.18rem; font-weight: 700; line-height: 1.55;
+      color: var(--text); margin-bottom: 24px;
+    }
+
+    /* options */
+    .options { display: grid; gap: 9px; }
+    .opt {
+      display: flex; align-items: center; gap: 13px;
+      background: var(--s2); border: 1px solid var(--border);
+      border-radius: 11px; padding: 13px 15px;
+      cursor: pointer; width: 100%; text-align: left;
+      color: var(--text); font-size: 0.92rem; font-weight: 500;
+      transition: background .14s, border-color .14s, transform .12s;
+    }
+    .opt:hover { background: rgba(0,212,255,.05); border-color: rgba(0,212,255,.28); transform: translateX(3px); }
+    .opt.selected { background: rgba(0,212,255,.09); border-color: var(--accent); }
+
+    .opt-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--bg); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.05rem; flex-shrink: 0;
+      transition: background .14s;
+    }
+    .opt.selected .opt-icon { background: rgba(0,212,255,.12); border-color: rgba(0,212,255,.3); }
+
+    .opt-dot {
+      width: 17px; height: 17px; border-radius: 50%;
+      border: 2px solid var(--muted); margin-left: auto; flex-shrink: 0;
+      transition: all .14s; position: relative;
+    }
+    .opt-dot::after {
+      content: ''; position: absolute; inset: 3px;
+      background: var(--accent); border-radius: 50%; opacity: 0; transition: opacity .14s;
+    }
+    .opt.selected .opt-dot { border-color: var(--accent); }
+    .opt.selected .opt-dot::after { opacity: 1; }
+
+    /* chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 8px; }
+    .chip {
+      background: var(--s2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 9px 18px; cursor: pointer;
+      font-size: 0.86rem; font-weight: 600; color: var(--muted);
+      transition: all .14s; display: flex; align-items: center; gap: 6px;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--text); }
+    .chip.selected { background: rgba(0,212,255,.1); border-color: var(--accent); color: var(--accent); }
+    .chip-hint { font-size: 0.73rem; color: var(--muted); margin-top: 5px; }
+
+    /* text input */
+    .q-textarea {
+      width: 100%; background: var(--s2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 13px 15px; color: var(--text); font-size: 0.92rem;
+      outline: none; resize: none; transition: border-color .14s; font-family: inherit; line-height: 1.6;
+    }
+    .q-textarea:focus { border-color: var(--accent); }
+    .q-textarea::placeholder { color: var(--muted); }
+    .char-row { display: flex; justify-content: space-between; margin-top: 6px; }
+    .char-hint { font-size: 0.72rem; color: var(--muted); }
+
+    /* nav */
+    .q-nav { display: flex; justify-content: space-between; align-items: center; }
+    .btn-back {
+      display: flex; align-items: center; gap: 6px;
+      background: transparent; color: var(--muted); font-size: 0.86rem; font-weight: 600;
+      border: 1px solid var(--border); border-radius: 99px; padding: 10px 20px; cursor: pointer;
+      transition: color .14s, border-color .14s;
+    }
+    .btn-back:hover { color: var(--text); border-color: var(--muted); }
+    .btn-back[disabled] { opacity: 0; pointer-events: none; }
+    .btn-next {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--accent), #0096bb);
+      color: #000; font-size: 0.9rem; font-weight: 800;
+      border: none; border-radius: 99px; padding: 11px 28px; cursor: pointer;
+      transition: transform .14s, box-shadow .14s; box-shadow: 0 0 20px rgba(0,212,255,.2);
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(0,212,255,.35); }
+    .btn-skip {
+      background: transparent; color: var(--muted); font-size: 0.8rem; border: none;
+      cursor: pointer; padding: 10px 14px; transition: color .14s;
+    }
+    .btn-skip:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 6px; }
+
+    /* ════════════════════════════════ RESULTS */
+    #s-results { padding: 0 24px 100px; }
+    .results-wrap { width: 100%; max-width: 640px; padding-top: 40px; }
+
+    .res-hero { text-align: center; margin-bottom: 36px; }
+    .profile-emblem {
+      width: 86px; height: 86px; margin: 0 auto 22px;
+      border-radius: 26px; display: flex; align-items: center; justify-content: center;
+      font-size: 42px; animation: popIn .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn { from { opacity:0; transform: scale(.4); } to { opacity:1; transform: scale(1); } }
+
+    .profile-eyebrow {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .res-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.15; margin-bottom: 12px; }
+    .score-row {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 99px; padding: 8px 22px; font-size: 0.84rem; color: var(--muted);
+    }
+    .score-num { font-size: 1.3rem; font-weight: 900; }
+
+    .card {
+      background: rgba(11,18,32,.88); backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 24px; margin-bottom: 14px;
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.76rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 18px;
+    }
+
+    /* dim bars */
+    .bar-row { display: flex; flex-direction: column; gap: 18px; }
+    .bar-item { display: flex; flex-direction: column; gap: 6px; }
+    .bar-meta { display: flex; justify-content: space-between; align-items: baseline; }
+    .bar-label-wrap { display: flex; flex-direction: column; gap: 1px; }
+    .bar-label { font-size: 0.88rem; font-weight: 700; }
+    .bar-sublabel { font-size: 0.7rem; color: var(--muted); }
+    .bar-score { font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+    .bar-track { height: 7px; background: var(--s3); border-radius: 99px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 99px; width: 0; transition: width 1.3s cubic-bezier(.4,0,.2,1); }
+
+    /* highlight boxes */
+    .hbox { border-radius: 11px; padding: 14px 16px; margin: 12px 0 0; }
+    .hbox-label { font-size: 0.68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
+    .hbox-text  { font-size: 0.9rem; line-height: 1.68; color: var(--text); }
+    .hbox-cyan   { background: rgba(0,212,255,.055); border: 1px solid rgba(0,212,255,.14); }
+    .hbox-cyan   .hbox-label { color: var(--accent); }
+    .hbox-violet { background: rgba(124,58,237,.065); border: 1px solid rgba(124,58,237,.18); }
+    .hbox-violet .hbox-label { color: var(--lavender); }
+    .hbox-green  { background: rgba(16,185,129,.055); border: 1px solid rgba(16,185,129,.14); }
+    .hbox-green  .hbox-label { color: var(--green); }
+
+    .profile-body { font-size: 0.93rem; line-height: 1.78; color: var(--muted); }
+
+    /* glossary */
+    .glossary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .gl-item { background: var(--s2); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; }
+    .gl-top { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+    .gl-icon { font-size: 1rem; }
+    .gl-name { font-size: 0.8rem; font-weight: 800; }
+    .gl-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.55; }
+    @media (max-width: 480px) { .glossary-grid { grid-template-columns: 1fr; } }
+
+    /* tags */
+    .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      background: rgba(16,185,129,.07); border: 1px solid rgba(16,185,129,.18);
+      color: var(--green); font-size: 0.79rem; font-weight: 600;
+      padding: 5px 13px; border-radius: 99px;
+    }
+
+    /* idea */
+    .idea-quote {
+      font-size: 0.94rem; font-style: italic; line-height: 1.68; color: var(--text);
+      border-left: 3px solid var(--accent); padding-left: 14px; margin: 0;
+    }
+
+    .disclaimer { text-align: center; font-size: 0.77rem; font-style: italic; color: var(--muted); padding: 18px 0 0; }
+
+    .res-actions { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 28px; }
+    .btn-cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--violet), #5b21b6);
+      color: #fff; font-size: 1rem; font-weight: 800;
+      padding: 16px 38px; border-radius: 99px; border: none; cursor: pointer;
+      text-decoration: none; transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 30px rgba(124,58,237,.4);
+    }
+    .btn-cta:hover { transform: translateY(-3px); box-shadow: 0 10px 44px rgba(124,58,237,.55); }
+    .btn-restart {
+      background: transparent; color: var(--muted); font-size: 0.82rem; border: none;
+      cursor: pointer; text-decoration: underline; padding: 8px; transition: color .14s;
+    }
+    .btn-restart:hover { color: var(--text); }
+
+    @media (max-width: 480px) {
+      .q-card { padding: 20px 16px; }
+      .card   { padding: 18px 16px; }
+      .dim-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bio-canvas"></canvas>
+
+<div id="app">
+
+  <!-- ══════════════════════════════════ LANDING -->
+  <div id="s-landing" class="screen active">
+    <div class="landing-inner">
+      <div class="dna-wrap">🧬</div>
+      <div class="eyebrow">⚗️ Biotech Business Readiness Assessment</div>
+      <h1>Could your research idea become a company?</h1>
+      <p class="subtitle">
+        A 3-minute assessment for researchers and scientists with an idea, to find out how close it is to becoming a real business.
+      </p>
+
+      <div class="stats">
+        <div class="stat-pill"><span class="stat-pill-num">~3</span><span class="stat-pill-label">minutes</span></div>
+        <div class="stat-pill"><span class="stat-pill-num">16</span><span class="stat-pill-label">questions</span></div>
+        <div class="stat-pill"><span class="stat-pill-num">4</span><span class="stat-pill-label">dimensions</span></div>
+        <div class="stat-pill"><span class="stat-pill-num">0</span><span class="stat-pill-label">data stored</span></div>
+      </div>
+
+      <div class="dim-cards">
+        <div class="dim-card">
+          <div class="dim-card-top">
+            <span class="dim-card-icon">🎯</span>
+            <span class="dim-card-name" style="color:#10b981">Market Need</span>
+          </div>
+          <div class="dim-card-sub">Is there a real, unsolved problem and a person who has it?</div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-card-top">
+            <span class="dim-card-icon">🧫</span>
+            <span class="dim-card-name" style="color:#00d4ff">Scientific Evidence</span>
+          </div>
+          <div class="dim-card-sub">How solid are your results, and has anyone outside your lab seen them?</div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-card-top">
+            <span class="dim-card-icon">🗺️</span>
+            <span class="dim-card-name" style="color:#f59e0b">Business Groundwork</span>
+          </div>
+          <div class="dim-card-sub">Have you thought about IP, costs and what building this would take?</div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-card-top">
+            <span class="dim-card-icon">🔥</span>
+            <span class="dim-card-name" style="color:#a78bfa">Founder Drive</span>
+          </div>
+          <div class="dim-card-sub">Do you want to build a company, and can you make time for it?</div>
+        </div>
+      </div>
+
+      <button class="btn-start" onclick="startQuiz()">
+        Start the assessment <span style="font-size:1.2rem">→</span>
+      </button>
+      <p class="landing-note">No signup. No email. Runs entirely in your browser.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ QUIZ -->
+  <div id="s-quiz" class="screen">
+    <div class="quiz-wrap">
+      <div class="quiz-topbar">
+        <div class="q-counter">Question <span id="q-num">1</span> of <span id="q-total">16</span></div>
+        <div class="pct-badge" id="q-pct">0%</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div id="dim-section-hdr" class="dim-section-header">
+        <span class="dsh-icon" id="dsh-icon">🎯</span>
+        <span class="dsh-info">
+          <span class="dsh-name" id="dsh-name">Market Need</span>
+          <span class="dsh-desc" id="dsh-desc">Does anyone actually need what you're building?</span>
+        </span>
+      </div>
+      <div id="q-area"></div>
+      <div class="q-nav">
+        <button class="btn-back" id="btn-back" onclick="goBack()">← Back</button>
+        <div class="nav-right">
+          <button class="btn-skip" id="btn-skip" onclick="goNext(true)" style="display:none">Skip</button>
+          <button class="btn-next" id="btn-next" onclick="goNext(false)" style="display:none">Continue →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ RESULTS -->
+  <div id="s-results" class="screen">
+    <div class="results-wrap">
+
+      <div class="res-hero">
+        <div class="profile-emblem" id="res-emblem">🔭</div>
+        <div class="profile-eyebrow">Your readiness profile</div>
+        <div class="res-title" id="res-title">The Curious Explorer</div>
+        <div class="score-row">
+          Total score: <span class="score-num" id="res-score">0</span>&nbsp;/ 36
+        </div>
+      </div>
+
+      <!-- dimension bars -->
+      <div class="card">
+        <div class="card-title">📊 Your readiness across 4 dimensions</div>
+        <div class="bar-row" id="bar-row"></div>
+      </div>
+
+      <!-- profile text -->
+      <div class="card">
+        <div class="card-title">📋 Your assessment</div>
+        <p class="profile-body" id="res-body"></p>
+        <div class="hbox hbox-cyan">
+          <div class="hbox-label">💪 Where you're strongest</div>
+          <div class="hbox-text" id="res-strength"></div>
+        </div>
+        <div class="hbox hbox-violet">
+          <div class="hbox-label">🎯 Your most important next step</div>
+          <div class="hbox-text" id="res-nextstep"></div>
+        </div>
+      </div>
+
+      <!-- glossary -->
+      <div class="card">
+        <div class="card-title">📖 What these dimensions mean</div>
+        <div class="glossary-grid">
+          <div class="gl-item">
+            <div class="gl-top"><span class="gl-icon">🎯</span><span class="gl-name" style="color:#10b981">Market Need</span></div>
+            <div class="gl-desc">Is there a real, unsolved problem? Can you name who has it? A strong score here means you understand your customer before you've written a business plan.</div>
+          </div>
+          <div class="gl-item">
+            <div class="gl-top"><span class="gl-icon">🧫</span><span class="gl-name" style="color:#00d4ff">Scientific Evidence</span></div>
+            <div class="gl-desc">Do your results hold up? Have others seen them? Investors trust your science before they trust your business. Evidence is credibility.</div>
+          </div>
+          <div class="gl-item">
+            <div class="gl-top"><span class="gl-icon">🗺️</span><span class="gl-name" style="color:#f59e0b">Business Groundwork</span></div>
+            <div class="gl-desc">Who owns your IP? What will the next phase cost? Groundwork is everything outside the science, and it trips up most scientist-founders.</div>
+          </div>
+          <div class="gl-item">
+            <div class="gl-top"><span class="gl-icon">🔥</span><span class="gl-name" style="color:#a78bfa">Founder Drive</span></div>
+            <div class="gl-desc">Building a company is different from running a lab. Drive measures whether you want that shift and have bandwidth for it. It's the fuel the other three dimensions run on.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- what would help -->
+      <div class="card" id="res-help-card" style="display:none">
+        <div class="card-title">🛠 What you said you need</div>
+        <div class="tag-list" id="res-help-tags"></div>
+      </div>
+
+      <!-- idea -->
+      <div class="card" id="res-idea-card" style="display:none">
+        <div class="card-title">💡 Your idea</div>
+        <p class="idea-quote" id="res-idea-text"></p>
+      </div>
+
+      <!-- biolabs -->
+      <div class="card" style="border-color:rgba(124,58,237,.22)">
+        <div class="card-title">🏛 About Biolabs</div>
+        <div class="hbox hbox-green" style="margin:0">
+          <div class="hbox-label">Flexible lab space built for early-stage founders</div>
+          <div class="hbox-text">Biolabs offers shared lab infrastructure: bench space, specialist equipment and a community of scientists, designed for founders at exactly the stage you're at now. Start with a single bench, no long-term lease required.</div>
+        </div>
+      </div>
+
+      <p class="disclaimer">This is a conversation starter, not a verdict on you or your science.</p>
+
+      <div class="res-actions">
+        <a class="btn-cta" href="https://biolabs.com/apply" target="_blank" rel="noopener">
+          Explore lab space at Biolabs →
+        </a>
+        <button class="btn-restart" onclick="restartQuiz()">Take the quiz again</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════ CANVAS BACKGROUND */
+(function () {
+  const canvas = document.getElementById('bio-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const rand  = (a, b) => a + Math.random() * (b - a);
+  const TAU   = Math.PI * 2;
+
+  /* ─────────────────────────────────────────────
+     1. FLOATING PARTICLES  (cyan dust)
+  ───────────────────────────────────────────── */
+  const particles = Array.from({ length: 60 }, () => ({
+    x: rand(0,1), y: rand(0,1),
+    r: rand(0.6, 2),
+    vx: (Math.random()-.5)*.00014,
+    vy: (Math.random()-.5)*.00014,
+    a: rand(.15,.45),
+  }));
+
+  /* ─────────────────────────────────────────────
+     2. MOLECULE NETWORK  (nodes + bonds)
+  ───────────────────────────────────────────── */
+  const HUES = [185, 215, 265, 310, 155];
+  const nodes = Array.from({ length: 16 }, (_, i) => ({
+    x: rand(.05,.95), y: rand(.05,.95),
+    vx: (Math.random()-.5)*.00011,
+    vy: (Math.random()-.5)*.00011,
+    r: rand(2.2, 3.8),
+    hue: HUES[i % HUES.length],
+  }));
+
+  /* ─────────────────────────────────────────────
+     3. DNA DOUBLE HELICES  (left + right edges)
+  ───────────────────────────────────────────── */
+  const HELICES = [
+    { xFrac:.055, phase:0,    speed:.30 },
+    { xFrac:.945, phase:1.57, speed:.27 },
+  ];
+
+  /* ─────────────────────────────────────────────
+     4. CELL MEMBRANES  (slowly drifting ellipses)
+  ───────────────────────────────────────────── */
+  const cells = Array.from({ length: 5 }, () => ({
+    x: rand(.1,.9), y: rand(.1,.9),
+    rx: rand(55,110), ry: rand(40,80),
+    rot: rand(0, TAU),
+    vx: (Math.random()-.5)*.00008,
+    vy: (Math.random()-.5)*.00008,
+    vr: (Math.random()-.5)*.0003,
+    hue: HUES[Math.floor(Math.random()*HUES.length)],
+    phase: rand(0, TAU),
+  }));
+
+  /* ─────────────────────────────────────────────
+     5. MICROSCOPE SCAN RINGS  (expanding halos)
+  ───────────────────────────────────────────── */
+  const rings = [];
+  function spawnRing() {
+    rings.push({
+      x: rand(.15,.85), y: rand(.15,.85),
+      r: rand(20,50), maxR: rand(140,240),
+      life: 1,
+      hue: HUES[Math.floor(Math.random()*HUES.length)],
+    });
+  }
+  // pre-seed a few
+  for (let i = 0; i < 4; i++) spawnRing();
+
+  /* ─────────────────────────────────────────────
+     6. PROTEIN CHAIN  (backbone ribbon)
+  ───────────────────────────────────────────── */
+  const CHAIN_NODES = 22;
+  const chain = Array.from({ length: CHAIN_NODES }, (_, i) => ({
+    bx: rand(.05,.95),   // base wander x
+    by: rand(.05,.95),
+    phase: rand(0, TAU),
+    freq: rand(.18,.32),
+    amp: rand(.04,.09),
+  }));
+
+  /* ─────────────────────────────────────────────
+     7. FLUORESCENT PULSE WAVES  (radial bursts from corners)
+  ───────────────────────────────────────────── */
+  const CORNERS = [
+    { x:0, y:0 }, { x:1, y:0 }, { x:0, y:1 }, { x:1, y:1 }
+  ];
+  let pulseT = 0;
+
+  /* ─────────────────────────────────────────────
+     8. PIPETTE DROP RIPPLES  (occasional ripples)
+  ───────────────────────────────────────────── */
+  const ripples = [];
+  function spawnRipple() {
+    ripples.push({
+      x: rand(.2,.8), y: rand(.2,.8),
+      r: 2, life: 1,
+      color: Math.random() > .5 ? '0,212,255' : '167,139,250',
+    });
+  }
+
+  /* ─────────────────────────────────────────────
+     TICK
+  ───────────────────────────────────────────── */
+  let t = 0;
+  let lastRing = 0, lastRipple = 0;
+
+  function tick(ts) {
+    ctx.clearRect(0, 0, W, H);
+    t += .007;
+    pulseT += .007;
+
+    /* ── spawn timers ── */
+    if (ts - lastRing > 2200)   { spawnRing();   lastRing = ts; }
+    if (ts - lastRipple > 3400) { spawnRipple(); lastRipple = ts; }
+
+    /* ══ 7. FLUORESCENT PULSE WAVES ══ */
+    CORNERS.forEach((c, ci) => {
+      const phase = ci * (TAU / 4);
+      const r = ((pulseT * .18 + phase) % 1) * Math.min(W, H) * .7;
+      const alpha = (1 - r / (Math.min(W,H)*.7)) * .06;
+      if (alpha > 0) {
+        ctx.beginPath();
+        ctx.arc(c.x * W, c.y * H, r, 0, TAU);
+        ctx.strokeStyle = `rgba(0,212,255,${alpha})`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+    });
+
+    /* ══ 8. PIPETTE DROP RIPPLES ══ */
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const rp = ripples[i];
+      rp.r  += 1.6;
+      rp.life -= .012;
+      if (rp.life <= 0) { ripples.splice(i,1); continue; }
+      ctx.beginPath();
+      ctx.arc(rp.x * W, rp.y * H, rp.r, 0, TAU);
+      ctx.strokeStyle = `rgba(${rp.color},${rp.life * .35})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      /* inner ring */
+      if (rp.r > 12) {
+        ctx.beginPath();
+        ctx.arc(rp.x * W, rp.y * H, rp.r * .55, 0, TAU);
+        ctx.strokeStyle = `rgba(${rp.color},${rp.life * .18})`;
+        ctx.lineWidth = .6;
+        ctx.stroke();
+      }
+    }
+
+    /* ══ 4. CELL MEMBRANES ══ */
+    cells.forEach(c => {
+      c.x   += c.vx; c.y   += c.vy; c.rot += c.vr;
+      if (c.x < .05 || c.x > .95) c.vx *= -1;
+      if (c.y < .05 || c.y > .95) c.vy *= -1;
+      const pulse = 1 + .06 * Math.sin(t * .7 + c.phase);
+      ctx.save();
+      ctx.translate(c.x * W, c.y * H);
+      ctx.rotate(c.rot);
+      /* outer membrane */
+      ctx.beginPath();
+      ctx.ellipse(0, 0, c.rx * pulse, c.ry * pulse, 0, 0, TAU);
+      ctx.strokeStyle = `hsla(${c.hue},80%,65%,.12)`;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      /* inner nucleus glow */
+      const ng = ctx.createRadialGradient(0,0,0,0,0, c.rx * .35);
+      ng.addColorStop(0, `hsla(${c.hue},80%,65%,.09)`);
+      ng.addColorStop(1, `hsla(${c.hue},80%,65%,0)`);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, c.rx * .35, c.ry * .35, 0, 0, TAU);
+      ctx.fillStyle = ng;
+      ctx.fill();
+      /* membrane proteins — small blobs on the ellipse perimeter */
+      for (let k = 0; k < 10; k++) {
+        const angle = (k / 10) * TAU + t * .15;
+        const px = Math.cos(angle) * c.rx * pulse;
+        const py = Math.sin(angle) * c.ry * pulse;
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, TAU);
+        ctx.fillStyle = `hsla(${c.hue},90%,70%,.28)`;
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    /* ══ 1. PARTICLES ══ */
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+      if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x * W, p.y * H, p.r, 0, TAU);
+      ctx.fillStyle = `rgba(0,212,255,${p.a * .3})`;
+      ctx.fill();
+    });
+
+    /* ══ 6. PROTEIN CHAIN ══ */
+    ctx.beginPath();
+    chain.forEach((cn, i) => {
+      const px = (cn.bx + Math.sin(t * cn.freq + cn.phase) * cn.amp) * W;
+      const py = (cn.by + Math.cos(t * cn.freq * .7 + cn.phase) * cn.amp * .6) * H;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.strokeStyle = 'rgba(16,185,129,.1)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    /* alpha-helix blobs along the chain */
+    chain.forEach((cn, i) => {
+      if (i % 3 !== 0) return;
+      const px = (cn.bx + Math.sin(t * cn.freq + cn.phase) * cn.amp) * W;
+      const py = (cn.by + Math.cos(t * cn.freq * .7 + cn.phase) * cn.amp * .6) * H;
+      const g = ctx.createRadialGradient(px,py,0, px,py,7);
+      g.addColorStop(0,'rgba(16,185,129,.22)');
+      g.addColorStop(1,'rgba(16,185,129,0)');
+      ctx.beginPath(); ctx.arc(px, py, 7, 0, TAU);
+      ctx.fillStyle = g; ctx.fill();
+    });
+
+    /* ══ 2. MOLECULE NETWORK ══ */
+    for (let i = 0; i < nodes.length; i++) {
+      nodes[i].x += nodes[i].vx; nodes[i].y += nodes[i].vy;
+      if (nodes[i].x < .04) nodes[i].vx =  Math.abs(nodes[i].vx);
+      if (nodes[i].x > .96) nodes[i].vx = -Math.abs(nodes[i].vx);
+      if (nodes[i].y < .04) nodes[i].vy =  Math.abs(nodes[i].vy);
+      if (nodes[i].y > .96) nodes[i].vy = -Math.abs(nodes[i].vy);
+      for (let j = i+1; j < nodes.length; j++) {
+        const dx = (nodes[i].x - nodes[j].x) * W;
+        const dy = (nodes[i].y - nodes[j].y) * H;
+        const d  = Math.sqrt(dx*dx + dy*dy);
+        if (d < 190) {
+          const a = (1 - d/190) * .2;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x*W, nodes[i].y*H);
+          ctx.lineTo(nodes[j].x*W, nodes[j].y*H);
+          ctx.strokeStyle = `hsla(${nodes[i].hue},80%,65%,${a})`;
+          ctx.lineWidth = .7;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      const pulse = 1 + .18 * Math.sin(t * 1.1 + n.x * 9);
+      const g = ctx.createRadialGradient(n.x*W, n.y*H, 0, n.x*W, n.y*H, n.r*pulse*3);
+      g.addColorStop(0, `hsla(${n.hue},90%,70%,.5)`);
+      g.addColorStop(1, `hsla(${n.hue},90%,70%,0)`);
+      ctx.beginPath();
+      ctx.arc(n.x*W, n.y*H, n.r*pulse, 0, TAU);
+      ctx.fillStyle = g; ctx.fill();
+    });
+
+    /* ══ 5. MICROSCOPE SCAN RINGS ══ */
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const rg = rings[i];
+      rg.r    += .55;
+      rg.life -= .004;
+      if (rg.r >= rg.maxR || rg.life <= 0) { rings.splice(i,1); continue; }
+      const a = rg.life * .18 * (1 - rg.r / rg.maxR);
+      ctx.beginPath();
+      ctx.arc(rg.x*W, rg.y*H, rg.r, 0, TAU);
+      ctx.strokeStyle = `hsla(${rg.hue},80%,65%,${a})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      /* crosshair ticks at N/S/E/W */
+      [[0,-1],[0,1],[1,0],[-1,0]].forEach(([dx,dy]) => {
+        const tx = rg.x*W + dx*(rg.r + 6);
+        const ty = rg.y*H + dy*(rg.r + 6);
+        ctx.beginPath();
+        ctx.moveTo(rg.x*W + dx*rg.r, rg.y*H + dy*rg.r);
+        ctx.lineTo(tx, ty);
+        ctx.strokeStyle = `hsla(${rg.hue},80%,65%,${a * .7})`;
+        ctx.lineWidth = .8;
+        ctx.stroke();
+      });
+    }
+
+    /* ══ 3. DNA DOUBLE HELICES ══ */
+    HELICES.forEach(h => {
+      const cx  = h.xFrac * W;
+      const amp = 30, step = 22;
+      const totalHeight = H + step * 2;
+      const offset = (t * h.speed * 60) % (step * 2);
+      const rungs = Math.ceil(totalHeight / step) + 1;
+      for (let i = 0; i < rungs; i++) {
+        const y  = i * step - offset;
+        const θ  = (i * step / totalHeight) * TAU * 5 + h.phase + t * h.speed;
+        const x1 = cx + Math.sin(θ)           * amp;
+        const x2 = cx + Math.sin(θ + Math.PI) * amp;
+
+        /* strand A dots */
+        ctx.beginPath(); ctx.arc(x1, y, 2.4, 0, TAU);
+        ctx.fillStyle = `rgba(0,212,255,.42)`; ctx.fill();
+        /* strand B dots */
+        ctx.beginPath(); ctx.arc(x2, y, 2.4, 0, TAU);
+        ctx.fillStyle = `rgba(167,139,250,.42)`; ctx.fill();
+        /* rung */
+        const ra = .07 + .06 * Math.abs(Math.sin(θ));
+        ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y);
+        ctx.strokeStyle = `rgba(255,255,255,${ra})`; ctx.lineWidth = .9; ctx.stroke();
+        /* minor-groove marker every 5 steps */
+        if (i % 5 === 0) {
+          const mx = (x1 + x2) / 2, my = y;
+          ctx.beginPath(); ctx.arc(mx, my, 1.4, 0, TAU);
+          ctx.fillStyle = `rgba(16,185,129,.35)`; ctx.fill();
+        }
+      }
+    });
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+})();
+
+/* ══════════════════════════════════════════ QUIZ DATA */
+const DIMS = {
+  need:       { icon:'🎯', name:'Market Need',         sub:'Is there a real problem, and does someone need this?',  color:'#10b981', max:9  },
+  evidence:   { icon:'🧫', name:'Scientific Evidence', sub:'How solid and validated is your science?',              color:'#00d4ff', max:9  },
+  groundwork: { icon:'🗺️', name:'Business Groundwork', sub:'Have you thought about IP, costs and practicalities?',  color:'#f59e0b', max:9  },
+  drive:      { icon:'🔥', name:'Founder Drive',       sub:'Do you want to do this, and can you make time for it?', color:'#a78bfa', max:9  },
+};
+
+const DIM_Q = {
+  need:       ['need1','need2','need3'],
+  evidence:   ['evid1','evid2','evid3'],
+  groundwork: ['ground1','ground2','ground3'],
+  drive:      ['drive1','drive2','drive3'],
+};
+
+const CHIP_CLASS = {
+  need:'dc-need', evidence:'dc-evidence', groundwork:'dc-groundwork', drive:'dc-drive', context:'dc-context'
+};
+
+const QUESTIONS = [
+  /* ── CONTEXT (not scored) ── */
+  {
+    id:'field', dim:'context', chip:'About you',
+    q: 'What area are you working in?',
+    type:'single',
+    opts:[
+      {e:'💊', l:'Drug discovery & therapeutics'},
+      {e:'🔬', l:'Diagnostics & detection'},
+      {e:'⚙️', l:'Lab tools & medical devices'},
+      {e:'🌱', l:'Food, agriculture & sustainability'},
+      {e:'🏭', l:'Industrial & environmental biotech'},
+      {e:'💻', l:'Computational & digital biology'},
+      {e:'🤔', l:'I\'m not sure yet'},
+    ]
+  },
+  {
+    id:'stage', dim:'context', chip:'About you',
+    q: 'Where are you in your career?',
+    type:'single',
+    opts:[
+      {e:'🎓', l:'Undergraduate or master\'s student'},
+      {e:'🧪', l:'PhD student or researcher'},
+      {e:'🔭', l:'Postdoctoral researcher'},
+      {e:'🏢', l:'Working in industry'},
+      {e:'🌐', l:'Something else'},
+    ]
+  },
+
+  /* ── NEED (max 12 — 4 questions × 3 pts) ── */
+  {
+    id:'need1', dim:'need', chip:'Market Need',
+    q: 'Does your work address a problem people genuinely struggle with?',
+    type:'scored',
+    opts:[
+      {e:'🤷', l:'Not thought about it that way',    p:0},
+      {e:'🌫️', l:'Possibly, still figuring it out',  p:1},
+      {e:'✅', l:'Yes, there is a real problem',      p:2},
+      {e:'🎯', l:'Yes, and I can name who has it',   p:3},
+    ]
+  },
+  {
+    id:'need2', dim:'need', chip:'Market Need',
+    q: 'Have you spoken with someone who would use or buy what you\'re building?',
+    type:'scored',
+    opts:[
+      {e:'🚫', l:'No, not yet',                        p:0},
+      {e:'💭', l:'I\'ve thought about who that is',    p:1},
+      {e:'🤝', l:'Yes, one real conversation',         p:2},
+      {e:'💬', l:'Yes, several conversations',         p:3},
+    ]
+  },
+  {
+    id:'need3', dim:'need', chip:'Market Need',
+    q: 'What do people use today for this problem?',
+    type:'scored',
+    opts:[
+      {e:'❓', l:'I haven\'t looked into it',              p:0},
+      {e:'🏆', l:'Good solutions already exist',          p:1},
+      {e:'🌵', l:'Nothing good exists',                   p:2},
+      {e:'⚠️', l:'Something exists, but with clear flaws', p:3},
+    ]
+  },
+  /* ── EVIDENCE (max 9 — 3 questions × 3 pts) ── */
+  {
+    id:'evid1', dim:'evidence', chip:'Scientific Evidence',
+    q: 'Where is your scientific work right now?',
+    type:'scored',
+    opts:[
+      {e:'💡', l:'Hypothesis or early idea',              p:0},
+      {e:'📊', l:'Some preliminary data',                 p:1},
+      {e:'🧫', l:'Proof of concept',                      p:2},
+      {e:'📈', l:'Repeated, reproducible results',        p:3},
+    ]
+  },
+  {
+    id:'evid2', dim:'evidence', chip:'Scientific Evidence',
+    q: 'Has anyone outside your team tested or validated your results?',
+    type:'scored',
+    opts:[
+      {e:'🔒', l:'No, only seen internally',                  p:0},
+      {e:'👋', l:'Yes, informally by a collaborator',         p:1},
+      {e:'🤝', l:'Yes, in a formal collaboration',            p:2},
+      {e:'🏛️', l:'Yes, independently replicated or reviewed', p:3},
+    ]
+  },
+  {
+    id:'evid3', dim:'evidence', chip:'Scientific Evidence',
+    q: 'Do you understand what it would take to make this work at a larger scale?',
+    type:'scored',
+    opts:[
+      {e:'🌫️', l:'Not thought about scale yet',                    p:0},
+      {e:'🤔', l:'General sense of the challenges',                p:1},
+      {e:'🔧', l:'Key technical bottlenecks identified',           p:2},
+      {e:'📐', l:'Clear technical roadmap for scale-up',           p:3},
+    ]
+  },
+  /* ── GROUNDWORK (max 9 — 3 questions × 3 pts) ── */
+  {
+    id:'ground1', dim:'groundwork', chip:'Business Groundwork',
+    q: 'Do you know who legally owns your idea?',
+    type:'scored',
+    opts:[
+      {e:'😶', l:'Never thought about it',                      p:0},
+      {e:'🏫', l:'Probably my institution, but I haven\'t checked', p:1},
+      {e:'📋', l:'I\'ve spoken to the right office',            p:2},
+      {e:'✅', l:'Fully clarified and documented',              p:3},
+    ]
+  },
+  {
+    id:'ground2', dim:'groundwork', chip:'Business Groundwork',
+    q: 'Do you know what your next phase of development would cost?',
+    type:'scored',
+    opts:[
+      {e:'🤷', l:'No idea',                              p:0},
+      {e:'💭', l:'A rough guess',                        p:1},
+      {e:'🔢', l:'A reasoned estimate',                  p:2},
+      {e:'📑', l:'A detailed breakdown with line items', p:3},
+    ]
+  },
+  {
+    id:'ground3', dim:'groundwork', chip:'Business Groundwork',
+    q: 'Do you have a sense of who would pay for this and how?',
+    type:'scored',
+    opts:[
+      {e:'🤷', l:'Only thought about the science',          p:0},
+      {e:'💭', l:'Vague sense of a business model',         p:1},
+      {e:'🏪', l:'Know the customer and what they\'d pay',  p:2},
+      {e:'📊', l:'Can sketch a model with revenue logic',   p:3},
+    ]
+  },
+
+  /* ── DRIVE (max 9 — 3 questions × 3 pts) ── */
+  {
+    id:'drive1', dim:'drive', chip:'Founder Drive',
+    q: 'When you imagine starting a company around this, how does it feel?',
+    type:'scored',
+    opts:[
+      {e:'🙅', l:'Never seriously considered it',  p:0},
+      {e:'😰', l:'Daunting',                        p:1},
+      {e:'🤔', l:'Intriguing',                      p:2},
+      {e:'🔥', l:'Exciting',                        p:3},
+    ]
+  },
+  {
+    id:'drive2', dim:'drive', chip:'Founder Drive',
+    q: 'How much time could you give this in the next six months?',
+    type:'scored',
+    opts:[
+      {e:'⏳', l:'None, fully committed elsewhere', p:0},
+      {e:'🕐', l:'A few hours occasionally',        p:1},
+      {e:'📅', l:'One dedicated day per week',      p:2},
+      {e:'🚀', l:'A significant chunk of my time',  p:3},
+    ]
+  },
+  {
+    id:'drive3', dim:'drive', chip:'Founder Drive',
+    q: 'Have you talked to someone who has built a biotech or deep-tech company?',
+    type:'scored',
+    opts:[
+      {e:'🚫', l:'No, I don\'t know anyone who has',           p:0},
+      {e:'👀', l:'I know of a few but haven\'t spoken to them', p:1},
+      {e:'☕', l:'Yes, at least one real conversation',         p:2},
+      {e:'🤝', l:'Yes, ongoing contact with founders or investors', p:3},
+    ]
+  },
+
+  /* ── PERSONALISATION ── */
+  {
+    id:'help', dim:'context', chip:'Personalisation',
+    q: 'What would help you most right now?',
+    hint: 'Pick up to 2',
+    type:'multi',
+    opts:[
+      {e:'🧪', l:'Lab space'},
+      {e:'🔧', l:'Equipment access'},
+      {e:'💰', l:'Early-stage funding'},
+      {e:'🧭', l:'A mentor who\'s done it before'},
+      {e:'👥', l:'Finding co-founders or a team'},
+      {e:'⚖️', l:'Legal and IP guidance'},
+    ]
+  },
+  {
+    id:'idea', dim:'context', chip:'Your idea',
+    q: 'Describe your idea in one sentence.',
+    hint: 'Optional. Press Skip to move on.',
+    type:'text',
+    placeholder: 'e.g. A rapid biosensor that detects early-stage sepsis in under 10 minutes',
+    maxlen: 140,
+    skippable: true,
+  },
+];
+
+/* ══════════════════════════════════════════ CONTENT */
+const PROFILES = [
+  {
+    min:0, max:8, id:'explorer', icon:'🔭', label:'Curious Explorer', title:'The Curious Explorer',
+    emblemBg:'rgba(100,116,139,.12)', emblemBorder:'rgba(100,116,139,.3)',
+    titleGrad:'linear-gradient(135deg,#e2e8f0,#94a3b8)',
+    body:"You're asking the right questions. You haven't looked at the commercial side yet, and that's completely normal. Most founders start here: a scientific instinct and an open mind about what it could become.",
+  },
+  {
+    min:9, max:18, id:'spotter', icon:'🗺️', label:'Problem Spotter', title:'The Problem Spotter',
+    emblemBg:'rgba(16,185,129,.1)', emblemBorder:'rgba(16,185,129,.28)',
+    titleGrad:'linear-gradient(135deg,#e2e8f0,#10b981)',
+    body:"You can see a real need. That is the most important ingredient. What's missing is stronger evidence and a clearer picture of the practical side. Many founders who built great companies scored exactly here at this stage.",
+  },
+  {
+    min:19, max:27, id:'builder', icon:'🏗️', label:'Proof Builder', title:'The Proof Builder',
+    emblemBg:'rgba(0,212,255,.1)', emblemBorder:'rgba(0,212,255,.28)',
+    titleGrad:'linear-gradient(135deg,#e2e8f0,#00d4ff)',
+    body:"Real results, real problem. This is exactly where most biotech companies are born. You're past the 'what if' stage. The next step is the right environment, the right people, and one clear milestone.",
+  },
+  {
+    min:28, max:36, id:'founder', icon:'🚀', label:'Founder in Waiting', title:'The Founder in Waiting',
+    emblemBg:'rgba(124,58,237,.1)', emblemBorder:'rgba(124,58,237,.3)',
+    titleGrad:'linear-gradient(135deg,#e2e8f0,#a78bfa)',
+    body:"You have the need, the evidence and the drive. What holds most people back at this point is access: space, equipment and the right community. The gap between nearly ready and actually started is smaller than it looks.",
+  },
+];
+
+const STRENGTH = {
+  need:       "You understand the problem and who has it. That clarity is rarer than it sounds — most ideas start far muddier.",
+  evidence:   "You have real results. That is the foundation everything else gets built on: funding, partnerships, credibility.",
+  groundwork: "You've started thinking beyond the lab. Most scientist-founders get tripped up here. You're already ahead.",
+  drive:      "You have the hunger. That is what keeps founders going when everything else gets hard.",
+};
+
+const NEXTSTEP = {
+  need:       "Talk to three people who might use what you're building. Don't pitch. Just ask what they do today instead. Their answer tells you everything.",
+  evidence:   "Write down the one experiment that would convince a sceptical colleague. Then run it. One strong result beats three weak ones.",
+  groundwork: "Before talking to anyone outside your institution, find out who owns your work. One conversation with your tech transfer office changes everything.",
+  drive:      "Start small. Have one coffee with someone who has started a company. Ask what the first six months felt like.",
+};
+
+/* ══════════════════════════════════════════ STATE */
+let cur = 0;
+const ans = {};
+
+/* ══════════════════════════════════════════ DIM SECTION HEADERS */
+const DIM_FIRST_Q = {};
+(function () {
+  const seen = new Set();
+  QUESTIONS.forEach((q, i) => {
+    if (q.dim !== 'context' && !seen.has(q.dim)) { DIM_FIRST_Q[i] = q.dim; seen.add(q.dim); }
+  });
+})();
+
+/* ══════════════════════════════════════════ NAV */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startQuiz() {
+  cur = 0;
+  Object.keys(ans).forEach(k => delete ans[k]);
+  show('s-quiz');
+  render();
+}
+
+function restartQuiz() { startQuiz(); }
+
+/* ══════════════════════════════════════════ RENDER */
+function render() {
+  const q = QUESTIONS[cur];
+  const total = QUESTIONS.length;
+  const pct = Math.round((cur / total) * 100);
+
+  document.getElementById('q-num').textContent = cur + 1;
+  document.getElementById('q-total').textContent = total;
+  document.getElementById('q-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('btn-back').disabled = cur === 0;
+
+  /* dim section header */
+  const hdr = document.getElementById('dim-section-hdr');
+  if (DIM_FIRST_Q[cur] !== undefined) {
+    const d = DIMS[DIM_FIRST_Q[cur]];
+    document.getElementById('dsh-icon').textContent = d.icon;
+    document.getElementById('dsh-name').textContent = d.name;
+    document.getElementById('dsh-name').style.color = d.color;
+    document.getElementById('dsh-desc').textContent = d.sub;
+    hdr.classList.add('visible');
+  } else {
+    hdr.classList.remove('visible');
+  }
+
+  document.getElementById('q-area').innerHTML = buildCard(q);
+
+  if (q.type === 'multi') {
+    document.querySelectorAll('.chip').forEach(ch => {
+      if ((ans[q.id] || []).includes(ch.dataset.v)) ch.classList.add('selected');
+      ch.addEventListener('click', () => toggleChip(ch, q.id));
+    });
+    showNav(true, true);
+  } else if (q.type === 'text') {
+    const ta = document.querySelector('.q-textarea');
+    const cc = document.querySelector('.char-hint.count');
+    if (ans[q.id]) ta.value = ans[q.id];
+    ta.addEventListener('input', () => {
+      ans[q.id] = ta.value;
+      cc.textContent = ta.value.length + ' / ' + q.maxlen;
+    });
+    showNav(true, !!q.skippable);
+  } else {
+    document.querySelectorAll('.opt').forEach(btn => {
+      const stored = ans[q.id];
+      if (stored !== undefined && String(stored) === btn.dataset.v) btn.classList.add('selected');
+      btn.addEventListener('click', () => selectOpt(btn, q));
+    });
+    showNav(false, false);
+  }
+}
+
+function showNav(showNext, showSkip) {
+  document.getElementById('btn-next').style.display = showNext ? 'flex' : 'none';
+  document.getElementById('btn-skip').style.display = (showNext && showSkip) ? 'block' : 'none';
+}
+
+function buildCard(q) {
+  const cc = CHIP_CLASS[q.dim] || 'dc-context';
+  let body = '';
+
+  if (q.type === 'single' || q.type === 'scored') {
+    body = '<div class="options">' +
+      q.opts.map(o => {
+        const v = q.type === 'scored' ? o.p : o.l;
+        return `<button class="opt" data-v="${v}">
+          <span class="opt-icon">${o.e}</span>
+          <span style="flex:1;line-height:1.45">${o.l}</span>
+          <span class="opt-dot"></span>
+        </button>`;
+      }).join('') + '</div>';
+  } else if (q.type === 'multi') {
+    body = '<div class="chips">' +
+      q.opts.map(o => `<button class="chip" data-v="${o.l}">${o.e} ${o.l}</button>`).join('') +
+    `</div><div class="chip-hint">${q.hint || ''}</div>`;
+  } else {
+    body = `<textarea class="q-textarea" rows="3" maxlength="${q.maxlen}" placeholder="${q.placeholder}"></textarea>
+    <div class="char-row">
+      <span class="char-hint">${q.hint || ''}</span>
+      <span class="char-hint count">0 / ${q.maxlen}</span>
+    </div>`;
+  }
+
+  return `<div class="q-card">
+    <div class="dim-chip ${cc}">${q.chip}</div>
+    <div class="q-text">${q.q}</div>
+    ${body}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════ INTERACTION */
+function selectOpt(btn, q) {
+  document.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ans[q.id] = q.type === 'scored' ? parseInt(btn.dataset.v, 10) : btn.dataset.v;
+  setTimeout(advance, 240);
+}
+
+function toggleChip(ch, qid) {
+  const v = ch.dataset.v;
+  if (!ans[qid]) ans[qid] = [];
+  const i = ans[qid].indexOf(v);
+  if (i === -1) {
+    if (ans[qid].length >= 2) {
+      const first = document.querySelector('.chip.selected');
+      if (first) { first.classList.remove('selected'); ans[qid].shift(); }
+    }
+    ans[qid].push(v); ch.classList.add('selected');
+  } else {
+    ans[qid].splice(i, 1); ch.classList.remove('selected');
+  }
+}
+
+function goNext(skip) { advance(); }
+function advance() {
+  if (cur < QUESTIONS.length - 1) { cur++; render(); }
+  else showResults();
+}
+function goBack() { if (cur > 0) { cur--; render(); } }
+
+/* ══════════════════════════════════════════ SCORING */
+function calcScores() {
+  const s = {};
+  for (const [dim, ids] of Object.entries(DIM_Q))
+    s[dim] = ids.reduce((acc, id) => acc + (ans[id] ?? 0), 0);
+  s.total = Object.values(s).reduce((a, b) => a + b, 0);
+  return s;
+}
+
+function showResults() {
+  const s = calcScores();
+  const maxTotal = Object.values(DIMS).reduce((a, d) => a + d.max, 0);
+  const profile = PROFILES.find(p => s.total >= p.min && s.total <= p.max) || PROFILES[0];
+  const dims = Object.keys(DIM_Q);
+  const pct = d => s[d] / DIMS[d].max;
+  const strongest = dims.reduce((a, b) => pct(a) >= pct(b) ? a : b);
+  const weakest   = dims.reduce((a, b) => pct(a) <= pct(b) ? a : b);
+
+  /* hero */
+  const emblem = document.getElementById('res-emblem');
+  emblem.textContent = profile.icon;
+  emblem.style.background = profile.emblemBg;
+  emblem.style.border = '1px solid ' + profile.emblemBorder;
+
+  const titleEl = document.getElementById('res-title');
+  titleEl.textContent = profile.title;
+  titleEl.style.background = profile.titleGrad;
+  titleEl.style.webkitBackgroundClip = 'text';
+  titleEl.style.webkitTextFillColor = 'transparent';
+  titleEl.style.backgroundClip = 'text';
+
+  document.getElementById('res-score').textContent = s.total;
+
+  /* bars */
+  document.getElementById('bar-row').innerHTML = dims.map(d => `
+    <div class="bar-item">
+      <div class="bar-meta">
+        <div class="bar-label-wrap">
+          <span class="bar-label">${DIMS[d].icon} ${DIMS[d].name}</span>
+          <span class="bar-sublabel">${DIMS[d].sub}</span>
+        </div>
+        <span class="bar-score">${s[d]} / ${DIMS[d].max}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="bf-${d}" style="background:${DIMS[d].color}"></div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('res-body').textContent = profile.body;
+  document.getElementById('res-strength').textContent = STRENGTH[strongest];
+  document.getElementById('res-nextstep').textContent = NEXTSTEP[weakest];
+
+  /* help */
+  const helpAns = ans['help'] || [];
+  if (helpAns.length) {
+    document.getElementById('res-help-tags').innerHTML = helpAns.map(h => `<span class="tag">${h}</span>`).join('');
+    document.getElementById('res-help-card').style.display = 'block';
+  }
+
+  /* idea */
+  const ideaTxt = (ans['idea'] || '').trim();
+  if (ideaTxt) {
+    document.getElementById('res-idea-text').textContent = `"${ideaTxt}"`;
+    document.getElementById('res-idea-card').style.display = 'block';
+  }
+
+  show('s-results');
+
+  /* animate bars */
+  requestAnimationFrame(() => setTimeout(() => {
+    dims.forEach(d => {
+      const el = document.getElementById('bf-' + d);
+      if (el) el.style.width = Math.round(pct(d) * 100) + '%';
+    });
+  }, 120));
+}
+</script>
+</body>
+</html>

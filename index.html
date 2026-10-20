@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Idea to Impact — Biotech Readiness Quiz</title>
+  <title>Idea to Impact: Biotech Readiness Quiz</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -405,7 +405,7 @@
     <div class="landing-inner">
       <div class="dna-wrap">🧬</div>
       <div class="eyebrow">⚗️ Biotech Business Readiness Assessment</div>
-      <h1>Could your research idea become a company?</h1>
+      <h1>Could your research idea become a business?</h1>
       <p class="subtitle">
         A 3-minute assessment for researchers and scientists with an idea, to find out how close it is to becoming a real business.
       </p>
@@ -757,7 +757,7 @@
       ctx.ellipse(0, 0, c.rx * .35, c.ry * .35, 0, 0, TAU);
       ctx.fillStyle = ng;
       ctx.fill();
-      /* membrane proteins — small blobs on the ellipse perimeter */
+      /* membrane proteins, small blobs on the ellipse perimeter */
       for (let k = 0; k < 10; k++) {
         const angle = (k / 10) * TAU + t * .15;
         const px = Math.cos(angle) * c.rx * pulse;
@@ -861,15 +861,18 @@
     }
 
     /* ══ 3. DNA DOUBLE HELICES ══ */
+    const elapsed = ts * .001;
     HELICES.forEach(h => {
       const cx  = h.xFrac * W;
       const amp = 30, step = 22;
       const totalHeight = H + step * 2;
-      const offset = (t * h.speed * 60) % (step * 2);
+      const scroll = elapsed * h.speed * 25;
+      const offset = scroll % (step * 2);
+      const rungCycle = Math.floor(scroll / (step * 2));
       const rungs = Math.ceil(totalHeight / step) + 1;
       for (let i = 0; i < rungs; i++) {
         const y  = i * step - offset;
-        const θ  = (i * step / totalHeight) * TAU * 5 + h.phase + t * h.speed;
+        const θ  = (y / totalHeight) * TAU * 5 + h.phase + elapsed * h.speed * .42;
         const x1 = cx + Math.sin(θ)           * amp;
         const x2 = cx + Math.sin(θ + Math.PI) * amp;
 
@@ -884,7 +887,7 @@
         ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y);
         ctx.strokeStyle = `rgba(255,255,255,${ra})`; ctx.lineWidth = .9; ctx.stroke();
         /* minor-groove marker every 5 steps */
-        if (i % 5 === 0) {
+        if ((i + rungCycle * 2) % 5 === 0) {
           const mx = (x1 + x2) / 2, my = y;
           ctx.beginPath(); ctx.arc(mx, my, 1.4, 0, TAU);
           ctx.fillStyle = `rgba(16,185,129,.35)`; ctx.fill();
@@ -946,7 +949,7 @@ const QUESTIONS = [
     ]
   },
 
-  /* ── NEED (max 12 — 4 questions × 3 pts) ── */
+  /* ── NEED (max 12: 4 questions × 3 pts) ── */
   {
     id:'need1', dim:'need', chip:'Market Need',
     q: 'Does your work address a problem people genuinely struggle with?',
@@ -980,7 +983,7 @@ const QUESTIONS = [
       {e:'⚠️', l:'Something exists, but with clear flaws', p:3},
     ]
   },
-  /* ── EVIDENCE (max 9 — 3 questions × 3 pts) ── */
+  /* ── EVIDENCE (max 9: 3 questions × 3 pts) ── */
   {
     id:'evid1', dim:'evidence', chip:'Scientific Evidence',
     q: 'Where is your scientific work right now?',
@@ -1014,7 +1017,7 @@ const QUESTIONS = [
       {e:'📐', l:'Clear technical roadmap for scale-up',           p:3},
     ]
   },
-  /* ── GROUNDWORK (max 9 — 3 questions × 3 pts) ── */
+  /* ── GROUNDWORK (max 9: 3 questions × 3 pts) ── */
   {
     id:'ground1', dim:'groundwork', chip:'Business Groundwork',
     q: 'Do you know who legally owns your idea?',
@@ -1049,7 +1052,7 @@ const QUESTIONS = [
     ]
   },
 
-  /* ── DRIVE (max 9 — 3 questions × 3 pts) ── */
+  /* ── DRIVE (max 9: 3 questions × 3 pts) ── */
   {
     id:'drive1', dim:'drive', chip:'Founder Drive',
     q: 'When you imagine starting a company around this, how does it feel?',
@@ -1139,7 +1142,7 @@ const PROFILES = [
 ];
 
 const STRENGTH = {
-  need:       "You understand the problem and who has it. That clarity is rarer than it sounds — most ideas start far muddier.",
+  need:       "You understand the problem and who has it. That clarity is rarer than it sounds, since most ideas start far muddier.",
   evidence:   "You have real results. That is the foundation everything else gets built on: funding, partnerships, credibility.",
   groundwork: "You've started thinking beyond the lab. Most scientist-founders get tripped up here. You're already ahead.",
   drive:      "You have the hunger. That is what keeps founders going when everything else gets hard.",
